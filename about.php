@@ -1,4 +1,5 @@
 <?php
+require_once 'db_config.php';  // Add this line here
 // About Us Page
 ?>
 <!DOCTYPE html>
