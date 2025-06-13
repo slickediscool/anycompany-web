@@ -1,6 +1,6 @@
 <?php
-// AnyCompany E-commerce Home Page
-// Add this line here
+    require_once 'db-config.php';
+    // Rest of your existing code
 ?>
 <!DOCTYPE html>
 <html lang="en">
