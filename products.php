@@ -1,6 +1,16 @@
 <?php
-// Products Page
+require_once 'db_config.php';
+
+// Fetch products from database
+try {
+    $stmt = $db->query("SELECT * FROM products");
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    error_log("Failed to fetch products: " . $e->getMessage());
+    $products = [];
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -195,73 +205,18 @@
             </select>
         </div>
 
-        <div class="product-grid">
-            <!-- Product 1 -->
+    <div class="product-grid">
+        <?php foreach($products as $product): ?>
             <div class="product-card">
-                <img src="https://via.placeholder.com/300" alt="Product 1" class="product-image">
+                <img src="https://via.placeholder.com/300" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
                 <div class="product-info">
-                    <h3 class="product-title">Wireless Earbuds</h3>
-                    <div class="product-price">$79.99</div>
-                    <p class="product-description">High-quality wireless earbuds with noise cancellation.</p>
-                    <a href="/cart.php?add=1" class="add-to-cart">Add to Cart</a>
+                    <h3 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h3>
+                    <div class="product-price">$<?php echo number_format($product['price'], 2); ?></div>
+                    <p class="product-description"><?php echo htmlspecialchars($product['description']); ?></p>
+                    <a href="/cart.php?add=<?php echo $product['id']; ?>" class="add-to-cart">Add to Cart</a>
                 </div>
             </div>
-
-            <!-- Product 2 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300" alt="Product 2" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">Smart Watch</h3>
-                    <div class="product-price">$149.99</div>
-                    <p class="product-description">Feature-rich smartwatch with health tracking.</p>
-                    <a href="/cart.php?add=2" class="add-to-cart">Add to Cart</a>
-                </div>
-            </div>
-
-            <!-- Product 3 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300" alt="Product 3" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">Bluetooth Speaker</h3>
-                    <div class="product-price">$59.99</div>
-                    <p class="product-description">Portable speaker with rich, clear sound.</p>
-                    <a href="/cart.php?add=3" class="add-to-cart">Add to Cart</a>
-                </div>
-            </div>
-
-            <!-- Product 4 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300" alt="Product 4" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">Phone Case</h3>
-                    <div class="product-price">$24.99</div>
-                    <p class="product-description">Durable protection for your smartphone.</p>
-                    <a href="/cart.php?add=4" class="add-to-cart">Add to Cart</a>
-                </div>
-            </div>
-
-            <!-- Product 5 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300" alt="Product 5" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">Power Bank</h3>
-                    <div class="product-price">$39.99</div>
-                    <p class="product-description">10000mAh portable charger for your devices.</p>
-                    <a href="/cart.php?add=5" class="add-to-cart">Add to Cart</a>
-                </div>
-            </div>
-
-            <!-- Product 6 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300" alt="Product 6" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">USB-C Cable</h3>
-                    <div class="product-price">$14.99</div>
-                    <p class="product-description">Fast charging cable with braided nylon.</p>
-                    <a href="/cart.php?add=6" class="add-to-cart">Add to Cart</a>
-                </div>
-            </div>
-        </div>
+        <?php endforeach; ?>
     </div>
 
     <footer>
