@@ -1,6 +1,5 @@
 <?php
 // Products Page
-require_once 'db_config.php';  // Add this line here
 ?>
 <!DOCTYPE html>
 <html lang="en">
