@@ -252,9 +252,11 @@ if (!empty($_SESSION['cart'])) {
                 <strong>Total: $<?php echo number_format($total, 2); ?></strong>
             </div>
 
+            <!-- Replace your existing checkout button with this -->
             <div style="text-align: right;">
-                <a href="#" class="checkout-btn">Proceed to Checkout</a>
+                <a href="/register.php?checkout=true" class="checkout-btn">Proceed to Checkout</a>
             </div>
+
         <?php endif; ?>
     </div>
 
