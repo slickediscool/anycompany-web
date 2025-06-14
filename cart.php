@@ -15,13 +15,14 @@ if (isset($_GET['add'])) {
     exit;
 }
 
-// Handle removing items from cart
+// Handle removing items from cart - REPLACE THIS SECTION
 if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
-    if (($key = array_search($remove_id, $_SESSION['cart'])) !== false) {
-        unset($_SESSION['cart'][$key]);
-        $_SESSION['cart'] = array_values($_SESSION['cart']); // Re-index array
-    }
+    $_SESSION['cart'] = array_filter($_SESSION['cart'], function($id) use ($remove_id) {
+        return $id != $remove_id;
+    });
+    // Re-index array
+    $_SESSION['cart'] = array_values($_SESSION['cart']);
     header('Location: cart.php');
     exit;
 }
