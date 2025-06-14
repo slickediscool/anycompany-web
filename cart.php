@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'db-config.php';
 
 // Initialize cart if it doesn't exist
 if (!isset($_SESSION['cart'])) {
@@ -10,6 +11,8 @@ if (!isset($_SESSION['cart'])) {
 if (isset($_GET['add'])) {
     $product_id = $_GET['add'];
     $_SESSION['cart'][] = $product_id;
+    header('Location: cart.php');
+    exit;
 }
 
 // Handle removing items from cart
@@ -17,18 +20,22 @@ if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
     if (($key = array_search($remove_id, $_SESSION['cart'])) !== false) {
         unset($_SESSION['cart'][$key]);
+        $_SESSION['cart'] = array_values($_SESSION['cart']); // Re-index array
     }
+    header('Location: cart.php');
+    exit;
 }
 
-// Sample product data (replace with database in production)
-$products = [
-    1 => ['name' => 'Wireless Earbuds', 'price' => 79.99],
-    2 => ['name' => 'Smart Watch', 'price' => 149.99],
-    3 => ['name' => 'Bluetooth Speaker', 'price' => 59.99],
-    4 => ['name' => 'Phone Case', 'price' => 24.99],
-    5 => ['name' => 'Power Bank', 'price' => 39.99],
-    6 => ['name' => 'USB-C Cable', 'price' => 14.99]
-];
+// Get products in cart from database
+$cart_items = [];
+$total = 0;
+
+if (!empty($_SESSION['cart'])) {
+    $placeholders = str_repeat('?,', count($_SESSION['cart']) - 1) . '?';
+    $stmt = $db->prepare("SELECT * FROM products WHERE id IN ($placeholders)");
+    $stmt->execute($_SESSION['cart']);
+    $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -38,158 +45,60 @@ $products = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - AnyCompany</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background: #f8f9fa;
-        }
-
-        .nav-container {
+        /* Copy your existing CSS styles here */
+        .cart-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 2rem;
         }
-
-        .logo {
-            text-decoration: none;
-            color: #333;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #333;
-        }
-
-        .demo-btn {
-            background: #007bff;
-            color: white !important;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-        }
-
-        .cart-container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 1rem;
-        }
-
-        .cart-title {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .cart-empty {
-            text-align: center;
-            padding: 3rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
+        
         .cart-table {
             width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
             background: white;
             border-radius: 8px;
+            overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-collapse: collapse;
         }
-
-        .cart-table th {
-            background: #f8f9fa;
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 2px solid #dee2e6;
-        }
-
+        
+        .cart-table th,
         .cart-table td {
             padding: 1rem;
+            text-align: left;
             border-bottom: 1px solid #dee2e6;
         }
-
-        .cart-item-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 4px;
+        
+        .cart-table th {
+            background: #f8f9fa;
         }
-
-        .remove-item {
+        
+        .remove-btn {
             color: #dc3545;
             text-decoration: none;
-            font-weight: bold;
         }
-
-        .cart-summary {
-            margin-top: 2rem;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
+        
         .cart-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-top: 2px solid #dee2e6;
-            margin-top: 1rem;
+            text-align: right;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
         }
-
+        
         .checkout-btn {
-            display: block;
-            width: 100%;
-            padding: 1rem;
+            display: inline-block;
+            padding: 1rem 2rem;
             background: #28a745;
             color: white;
-            text-align: center;
             text-decoration: none;
             border-radius: 4px;
-            margin-top: 1rem;
-            transition: background-color 0.3s ease;
         }
-
-        .checkout-btn:hover {
-            background: #218838;
-        }
-
-        .continue-shopping {
-            display: block;
+        
+        .empty-cart {
             text-align: center;
-            margin-top: 1rem;
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        footer {
-            background: #333;
-            color: white;
             padding: 2rem;
-            text-align: center;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .cart-table {
-                display: block;
-                overflow-x: auto;
-            }
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -208,14 +117,17 @@ $products = [
         </div>
     </nav>
 
-    <div class="cart-container">
-        <h1 class="cart-title">Shopping Cart</h1>
+    <section class="hero">
+        <h1>Shopping Cart</h1>
+        <p>Review your items and checkout</p>
+    </section>
 
-        <?php if (empty($_SESSION['cart'])): ?>
-            <div class="cart-empty">
+    <div class="cart-container">
+        <?php if (empty($cart_items)): ?>
+            <div class="empty-cart">
                 <h2>Your cart is empty</h2>
-                <p>Add some products to your cart!</p>
-                <a href="/products.php" class="continue-shopping">Continue Shopping</a>
+                <p>Go to the products page to add items to your cart.</p>
+                <a href="/products.php" class="btn-primary">Browse Products</a>
             </div>
         <?php else: ?>
             <table class="cart-table">
@@ -227,39 +139,25 @@ $products = [
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    $total = 0;
-                    foreach ($_SESSION['cart'] as $product_id):
-                        if (isset($products[$product_id])):
-                            $total += $products[$product_id]['price'];
+                    <?php foreach ($cart_items as $item): 
+                        $total += $item['price'];
                     ?>
-                    <tr>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <img src="https://via.placeholder.com/80" alt="Product" class="cart-item-image">
-                                <span><?php echo htmlspecialchars($products[$product_id]['name']); ?></span>
-                            </div>
-                        </td>
-                        <td>$<?php echo number_format($products[$product_id]['price'], 2); ?></td>
-                        <td>
-                            <a href="?remove=<?php echo $product_id; ?>" class="remove-item">Remove</a>
-                        </td>
-                    </tr>
-                    <?php
-                        endif;
-                    endforeach;
-                    ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($item['name']); ?></td>
+                            <td>$<?php echo number_format($item['price'], 2); ?></td>
+                            <td>
+                                <a href="cart.php?remove=<?php echo $item['id']; ?>" class="remove-btn">Remove</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
 
-            <div class="cart-summary">
-                <div class="cart-total">
-                    <h3>Total</h3>
-                    <h3>$<?php echo number_format($total, 2); ?></h3>
-                </div>
-                <a href="#" class="checkout-btn">Proceed to Checkout</a>
-                <a href="/products.php" class="continue-shopping">Continue Shopping</a>
+            <div class="cart-total">
+                <strong>Total: $<?php echo number_format($total, 2); ?></strong>
             </div>
+
+            <a href="#" class="checkout-btn">Proceed to Checkout</a>
         <?php endif; ?>
     </div>
 
@@ -268,3 +166,4 @@ $products = [
     </footer>
 </body>
 </html>
+
