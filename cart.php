@@ -35,6 +35,11 @@ if (!empty($_SESSION['cart'])) {
     $stmt = $db->prepare("SELECT * FROM products WHERE id IN ($placeholders)");
     $stmt->execute($_SESSION['cart']);
     $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Calculate total
+    foreach ($cart_items as $item) {
+        $total += $item['price'];
+    }
 }
 ?>
 
@@ -45,45 +50,110 @@ if (!empty($_SESSION['cart'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - AnyCompany</title>
     <style>
-        /* Copy your existing CSS styles here */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background: #f8f9fa;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            text-decoration: none;
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .demo-btn {
+            background: #007bff;
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        .hero {
+            background: white;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
         .cart-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
-        
+
         .cart-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 2rem;
             background: white;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
-        
+
         .cart-table th,
         .cart-table td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid #dee2e6;
         }
-        
+
         .cart-table th {
             background: #f8f9fa;
+            font-weight: bold;
         }
-        
+
         .remove-btn {
             color: #dc3545;
             text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background: #fff;
+            border: 1px solid #dc3545;
         }
-        
+
+        .remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
         .cart-total {
             text-align: right;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             margin-bottom: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .checkout-btn {
             display: inline-block;
             padding: 1rem 2rem;
@@ -91,14 +161,41 @@ if (!empty($_SESSION['cart'])) {
             color: white;
             text-decoration: none;
             border-radius: 4px;
+            font-weight: bold;
         }
-        
+
+        .checkout-btn:hover {
+            background: #218838;
+        }
+
         .empty-cart {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-cart h2 {
+            margin-bottom: 1rem;
+        }
+
+        .continue-shopping {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
         }
     </style>
 </head>
@@ -126,8 +223,8 @@ if (!empty($_SESSION['cart'])) {
         <?php if (empty($cart_items)): ?>
             <div class="empty-cart">
                 <h2>Your cart is empty</h2>
-                <p>Go to the products page to add items to your cart.</p>
-                <a href="/products.php" class="btn-primary">Browse Products</a>
+                <p>Looks like you haven't added any items to your cart yet.</p>
+                <a href="/products.php" class="continue-shopping">Continue Shopping</a>
             </div>
         <?php else: ?>
             <table class="cart-table">
@@ -139,9 +236,7 @@ if (!empty($_SESSION['cart'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($cart_items as $item): 
-                        $total += $item['price'];
-                    ?>
+                    <?php foreach ($cart_items as $item): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($item['name']); ?></td>
                             <td>$<?php echo number_format($item['price'], 2); ?></td>
@@ -157,7 +252,9 @@ if (!empty($_SESSION['cart'])) {
                 <strong>Total: $<?php echo number_format($total, 2); ?></strong>
             </div>
 
-            <a href="#" class="checkout-btn">Proceed to Checkout</a>
+            <div style="text-align: right;">
+                <a href="#" class="checkout-btn">Proceed to Checkout</a>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -166,4 +263,5 @@ if (!empty($_SESSION['cart'])) {
     </footer>
 </body>
 </html>
+
 
