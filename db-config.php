@@ -1,6 +1,6 @@
 <?php
 $db_host = 'ecommerce-db.cmx22ymccmu0.us-east-1.rds.amazonaws.com';
-$db_name = 'ecommerce-db';
+$db_name = 'ecommerce';
 $db_user = 'admin';
 $db_pass = 'zor156!75';  // Use your actual RDS password
 
