@@ -1,12 +1,27 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once 'db_config.php';
 
 // Fetch products from database
 try {
+    if (!$db) {
+        throw new Exception("Database connection not established");
+    }
+    
     $stmt = $db->query("SELECT * FROM products");
+    if (!$stmt) {
+        throw new Exception("Query failed");
+    }
+    
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    error_log("Failed to fetch products: " . $e->getMessage());
+    // Debug output
+    echo "<!-- Debug: Found " . count($products) . " products -->";
+    
+} catch(Exception $e) {
+    echo "Error: " . $e->getMessage();
+    error_log("Products page error: " . $e->getMessage());
     $products = [];
 }
 ?>
