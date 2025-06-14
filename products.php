@@ -4,20 +4,23 @@ ini_set('display_errors', 1);
 
 require_once 'db_config.php';
 
-// Fetch products from database
+// Debug connection
 try {
     if (!$db) {
         throw new Exception("Database connection not established");
     }
     
-    $stmt = $db->query("SELECT * FROM products");
-    if (!$stmt) {
-        throw new Exception("Query failed");
-    }
+    // Test query
+    $stmt = $db->query("SELECT COUNT(*) FROM products");
+    $count = $stmt->fetchColumn();
+    echo "<!-- Debug: Database connected, found $count products -->";
     
+    // Fetch actual products
+    $stmt = $db->query("SELECT * FROM products");
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // Debug output
-    echo "<!-- Debug: Found " . count($products) . " products -->";
+    
+    // More debug info
+    echo "<!-- Debug: Successfully fetched " . count($products) . " products -->";
     
 } catch(Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -220,18 +223,19 @@ try {
             </select>
         </div>
 
-    <div class="product-grid">
-        <?php foreach($products as $product): ?>
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h3>
-                    <div class="product-price">$<?php echo number_format($product['price'], 2); ?></div>
-                    <p class="product-description"><?php echo htmlspecialchars($product['description']); ?></p>
-                    <a href="/cart.php?add=<?php echo $product['id']; ?>" class="add-to-cart">Add to Cart</a>
+        <div class="product-grid">
+            <?php foreach($products as $product): ?>
+                <div class="product-card">
+                    <img src="https://via.placeholder.com/300" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h3>
+                        <div class="product-price">$<?php echo number_format($product['price'], 2); ?></div>
+                        <p class="product-description"><?php echo htmlspecialchars($product['description']); ?></p>
+                        <a href="/cart.php?add=<?php echo $product['id']; ?>" class="add-to-cart">Add to Cart</a>
+                    </div>
                 </div>
-            </div>
-        <?php endforeach; ?>
+            <?php endforeach; ?>
+        </div>
     </div>
 
     <footer>
@@ -239,3 +243,4 @@ try {
     </footer>
 </body>
 </html>
+
