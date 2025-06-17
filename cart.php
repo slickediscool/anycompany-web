@@ -16,7 +16,6 @@ if (isset($_GET['add'])) {
 }
 
 // Handle removing items from cart
-$message = '';
 if (isset($_GET['remove'])) {
     $remove_id = (int)$_GET['remove'];
     $key = array_search($remove_id, $_SESSION['cart']);
@@ -24,16 +23,10 @@ if (isset($_GET['remove'])) {
     if ($key !== false) {
         unset($_SESSION['cart'][$key]);
         $_SESSION['cart'] = array_values($_SESSION['cart']); // Re-index array
-        $message = "Item removed from cart";
     }
     
-    // Redirect to prevent double-removal on refresh
-    header('Location: cart.php?removed=true');
+    header('Location: cart.php');
     exit;
-}
-
-if (isset($_GET['removed'])) {
-    $message = "Item removed from cart";
 }
 
 // Get products in cart from database
@@ -60,14 +53,152 @@ if (!empty($_SESSION['cart'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - AnyCompany</title>
     <style>
-        /* Your existing CSS styles here */
-        .alert {
-            background: #d4edda;
-            color: #155724;
-            padding: 10px;
-            margin: 10px auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background: #f8f9fa;
+        }
+
+        .nav-container {
             max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            text-decoration: none;
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .demo-btn {
+            background: #007bff;
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        .hero {
+            background: white;
+            padding: 2rem;
             text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .cart-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .cart-table th,
+        .cart-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .cart-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .remove-btn {
+            color: #dc3545;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background: #fff;
+            border: 1px solid #dc3545;
+        }
+
+        .remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .cart-total {
+            text-align: right;
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .checkout-btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .checkout-btn:hover {
+            background: #218838;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-cart h2 {
+            margin-bottom: 1rem;
+        }
+
+        .continue-shopping {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
         }
     </style>
 </head>
@@ -85,12 +216,6 @@ if (!empty($_SESSION['cart'])) {
             </div>
         </div>
     </nav>
-
-    <?php if ($message): ?>
-        <div class="alert">
-            <?php echo htmlspecialchars($message); ?>
-        </div>
-    <?php endif; ?>
 
     <section class="hero">
         <h1>Shopping Cart</h1>
@@ -151,6 +276,7 @@ if (!empty($_SESSION['cart'])) {
     </script>
 </body>
 </html>
+
 
 
 
